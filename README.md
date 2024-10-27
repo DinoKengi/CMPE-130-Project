@@ -1,1 +1,1 @@
-testing testing
+This is our CMPE 130 Project. We are doing a text-based adventure game where the player will be able to choose various classes at the start and embark on their journey. They will be coursing through many rooms where they will be facing many monsters or if they're lucky, loot rooms! They will be continuing onwards until they meet the final boss and test their strength that they accumulated.
