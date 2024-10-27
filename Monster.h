@@ -8,8 +8,8 @@ class Monster : public Stats {
 public:
     Monster(const std::string& name, int health, int damage, int defense);
 
-    virtual void attackPlayer() = 0;  // Each monster has its own attack behavior
-    bool isAlive() const;  // Check if the monster is still alive
+    virtual void attack() = 0;  // each monster has its own attack behavior
+    bool isAlive() const;  // check if monster's alive
     std::string getName() const;  
 
 protected:
@@ -18,39 +18,39 @@ protected:
 
 class Ogre : public Monster {
 public:
-    Ogre();
-    void attackPlayer() override;
+    Ogre() : Monster("Ogre", 100, 20, 5) {}
+    void attack() override;
 };
 
 class Goblin : public Monster {
 public:
-    Goblin();
-    void attackPlayer() override;
+    Goblin() : Monster("Goblin", 40, 10, 2) {}
+    void attack() override;
 };
 
 class Slime : public Monster {
 public:
-    Slime();
-    void attackPlayer() override;
+    Slime() : Monster("Slime", 30, 5, 1) {}
+    void attack() override;
 };
 
 class Bandit : public Monster {
 public:
-    Bandit();
-    void attackPlayer() override;
+    Bandit() : Monster("Bandit", 70, 15, 5) {}
+    void attack() override;
 };
 
 class Ghost : public Monster {
 public:
-    Ghost();
-    void attackPlayer() override;
+    Ghost() : Monster("Ghost", 50, 15, 2) {}
+    void attack() override;
 };
 
 // idea: dragon is final boss
 class Dragon : public Monster {
 public:
-    Dragon();
-    void attackPlayer() override;
+    Dragon() : Monster("Dragon", 2000, 60, 30) {}
+    void attack() override;
 };
 
 #endif 
