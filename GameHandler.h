@@ -8,7 +8,7 @@
 
 class GameManager {
 public:
-    GameManager();
+    GameManager(int numRooms);
     
     void startGame();  // main function to begin the game
     void explore();    // handles exploration logic
