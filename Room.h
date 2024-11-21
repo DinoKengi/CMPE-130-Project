@@ -2,30 +2,26 @@
 #define ROOM_H
 
 #include <string>
-#include <unordered_map>
 #include <vector>
-#include "Loot.h"
+#include <utility> // for std::pair
+#include "Buff.h"
 
 class Room {
 public:
     Room(std::string description);
 
-    // set rooms next to each other
-    void setAdjacentRoom(const std::string& direction, Room* adjacentRoom);
+    void setBuff(const Buff& buff);
+    bool hasBuff() const;
+    void giveBuff(Player& player); // if player comes into buff room then give buff
 
-    // accessor
-    Room* getAdjacentRoom(const std::string& direction);
-    std::string getDescription() const;
-    
-    // loot handling
-    void addLoot(Loot lootItem);
-    const std::vector<Loot>& getLoot() const;
-    bool hasLoot() const;
+    void addEdge(Room* room, int weight); // add edge to a node
+    std::vector<std::pair<Room*, int>> getConnections() const;
+
+    std::string getDesc() const;
 
 private:
     std::string description;
-    std::unordered_map<std::string, Room*> adjacentRooms; // maps directions to rooms
-    std::vector<Loot> loot;  // list of loot in room
+    Buff* roomBuff; 
 };
 
 #endif 
