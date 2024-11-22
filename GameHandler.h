@@ -4,7 +4,6 @@
 #include "Story.h"
 #include "Encounter.h"
 #include "Map.h"
-#include "Inventory.h"
 
 class GameManager {
 public:
@@ -19,7 +18,6 @@ private:
     Story story;
     RandomEncounter encounterGen;
     MapExplore exploration;
-    Inventory playerInventory;
 };
 
 #endif 

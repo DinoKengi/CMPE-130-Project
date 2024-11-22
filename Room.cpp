@@ -1,31 +1,32 @@
 #include "Room.h"
 
-Room::Room(std::string description)
-    : description(description) {}
+Room::Room(const std::string& desc)
+    : desc(desc), roomBuff(nullptr) {}
 
-void Room::setAdjacentRoom(const std::string& direction, Room* adjacentRoom) {
-    adjacentRooms[direction] = adjacentRoom;
+void Room::setBuff(const Buff& buff) {
+    roomBuff = new Buff(buff);
 }
 
-Room* Room::getAdjacentRoom(const std::string& direction) {
-    if (adjacentRooms.find(direction) != adjacentRooms.end()) {
-        return adjacentRooms[direction];
+bool Room::hasBuff() const {
+    return roomBuff != nullptr;
+}
+
+void Room::giveBuff(Player& player) {
+    if (roomBuff) {
+        roomBuff->applyTo(player); // Apply the buff to the player
+        delete roomBuff;          // Remove the buff from the room (applied once)
+        roomBuff = nullptr;
     }
-    return nullptr; // return nullptr if no room in that direction
 }
 
-std::string Room::getDescription() const {
-    return description;
+void Room::addEdge(Room* room, int weight) {
+    edges.emplace_back(room, weight);
 }
 
-void Room::addLoot(Loot lootItem) {
-    loot.push_back(lootItem);
+std::vector<std::pair<Room*, int>> Room::getEdges() const {
+    return edges;
 }
 
-const std::vector<Loot>& Room::getLoot() const {
-    return loot;
-}
-
-bool Room::hasLoot() const {
-    return !loot.empty();
+std::string Room::getDesc() const {
+    return desc;
 }

@@ -7,8 +7,9 @@ class Player {
 public:
     Player(const std::string& name, int health, int damage, int defense);
 
+    void increaseDamage(int value);
 private:
-
+    int damage;
 
 };
 

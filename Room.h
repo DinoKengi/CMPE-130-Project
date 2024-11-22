@@ -5,23 +5,25 @@
 #include <vector>
 #include <utility> // for std::pair
 #include "Buff.h"
+#include "Player.h"
 
 class Room {
 public:
-    Room(std::string description);
+    Room(const std::string& desc);
 
     void setBuff(const Buff& buff);
     bool hasBuff() const;
     void giveBuff(Player& player); // if player comes into buff room then give buff
 
     void addEdge(Room* room, int weight); // add edge to a node
-    std::vector<std::pair<Room*, int>> getConnections() const;
+    std::vector<std::pair<Room*, int>> getEdges() const;
 
     std::string getDesc() const;
 
 private:
-    std::string description;
+    std::string desc;
     Buff* roomBuff; 
+    std::vector<std::pair<Room*, int>> edges;
 };
 
 #endif 

@@ -3,18 +3,18 @@
 
 #include <string>
 
-class Player; // Forward declaration
+class Player; // forward declaration
 
 class Buff {
 public:
-    Buff(const std::string& description, int value);
+    Buff(const std::string& desc, int value);
 
-    std::string getDescription() const;
-    void applyTo(Player& player) const; // Apply the buff to the player
+    std::string getDesc() const;
+    void applyTo(Player& player) const; // apply the buff to the player
 
 private:
-    std::string description; // e.g., "+1 damage"
-    int value; // Effect value
+    std::string desc; // ex: "+1 damage"
+    int value; // effect value
 };
 
 #endif

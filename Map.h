@@ -28,6 +28,8 @@ public:
     void genTree(bool useKruskal = false); // option between prim or kruskal
 
     Room* getStart() const; 
+    void addRoom(int id, const Room& room);
+    Room* getRoom(int id);
 
 private:
     std::vector<Room> room;
