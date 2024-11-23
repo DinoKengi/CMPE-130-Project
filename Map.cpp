@@ -3,11 +3,6 @@
 #include <random>
 #include <unordered_map>
 
-struct Edge {
-    Room* room1;
-    Room* room2;
-    int weight;
-};
 
 MapExplore::MapExplore(int numRooms) {
     for (int i = 0; i < numRooms; ++i) {
@@ -25,55 +20,50 @@ void MapExplore::shuffleRoom() {
 }
 
 void MapExplore::genTree() {
-    genPrim();
-}
-
-void MapExplore::genPrim() {
     if (room.empty()) {
-        std::cout << "Error: No rooms available.\n";
+        std::cerr << "Error: No rooms to generate MST.\n";
         return;
     }
 
-    Room* startRoom = &room[0]; // Start with the first room
-    std::priority_queue<std::pair<int, Room*>, std::vector<std::pair<int, Room*>>, std::greater<>> pq;
+    // Priority queue for edges with smallest weight first
+    std::priority_queue<Edge, std::vector<Edge>, std::greater<Edge>> pq;
     std::set<Room*> visited;
 
-    visited.insert(startRoom);
-    std::cout << "Starting at room: " << startRoom->getDesc() << std::endl;
+    // Start with the first room
+    visited.insert(&room[0]);
 
-    // Add all edges from the start room
-    for (const auto& conn : startRoom->getEdges()) {
-        pq.push({conn.second, conn.first});
-        std::cout << "Added edge to queue: weight=" << conn.second << ", to=" << conn.first->getDesc() << std::endl;
+    // Add edges of the first room to the queue
+    for (const auto& edge : room[0].getEdges()) {
+        pq.push(Edge(&room[0], edge.first, edge.second)); // Convert std::pair to Edge
     }
 
-    while (!pq.empty() && visited.size() < room.size()) {
-        auto [weight, current] = pq.top();
+    while (!pq.empty()) {
+        Edge current = pq.top();
         pq.pop();
 
-        if (visited.count(current)) {
-            std::cout << "Skipping already visited room: " << current->getDesc() << std::endl;
-            continue; // Skip already visited rooms
-        }
+        if (visited.find(current.to) != visited.end()) continue;
 
-        visited.insert(current);
-        std::cout << "Connecting to room: " << current->getDesc() << " with weight=" << weight << std::endl;
+        visited.insert(current.to);
+        mst.emplace_back(current);
 
-        // Add unvisited neighbors to the priority queue
-        for (const auto& conn : current->getEdges()) {
-            if (!visited.count(conn.first)) {
-                pq.push({conn.second, conn.first});
-                std::cout << "Added edge to queue: weight=" << conn.second << ", to=" << conn.first->getDesc() << std::endl;
+        std::cout << "Connecting " << current.from->getDesc() << " to " << current.to->getDesc() << "\n";
+
+        for (const auto& edge : current.to->getEdges()) {
+            if (visited.find(edge.first) == visited.end()) {
+                pq.push(Edge(current.to, edge.first, edge.second));
             }
         }
     }
 
-    if (visited.size() < room.size()) {
-        std::cout << "Error: MST could not connect all rooms.\n";
-    } else {
-        std::cout << "MST successfully generated with Prim's Algorithm.\n";
+    if (visited.size() != room.size()) {
+        std::cerr << "Error: MST could not connect all rooms.\n";
+        return;
     }
+
+    std::cout << "MST successfully generated.\n";
 }
+
+
 
 
 std::pair<Room*, int> MapExplore::findfarthestNode(Room* startRoom) {
