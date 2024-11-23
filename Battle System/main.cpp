@@ -1,9 +1,7 @@
 #include "Player.h"
 #include "Monster.h"
 #include "Battle.h"
-#include "Player.cpp"
-#include "Monster.cpp"
-#include "Battle.cpp"
+#include "Stats.h"
 #include <iostream>
 
 int main() {
