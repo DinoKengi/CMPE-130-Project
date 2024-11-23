@@ -10,6 +10,7 @@ public:
     Buff(const std::string& desc, int value);
 
     std::string getDesc() const;
+    int getValue() const;
     void applyTo(Player& player) const; // apply the buff to the player
 
 private:

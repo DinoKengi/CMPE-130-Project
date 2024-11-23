@@ -15,15 +15,15 @@ public:
     bool hasBuff() const;
     void giveBuff(Player& player); // if player comes into buff room then give buff
 
-    void addEdge(Room* room, int weight); // add edge to a node
+    void addEdge(Room* room, int weight);  // add edge to a node
     std::vector<std::pair<Room*, int>> getEdges() const;
 
     std::string getDesc() const;
 
 private:
-    std::string desc;
+    std::string desc; // room description
     Buff* roomBuff; 
-    std::vector<std::pair<Room*, int>> edges;
+    std::vector<std::pair<Room*, int>> edges; // connections to other rooms
 };
 
-#endif 
+#endif

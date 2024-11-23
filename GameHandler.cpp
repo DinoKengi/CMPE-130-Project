@@ -18,7 +18,7 @@ void GameManager::explore() {
     std::cin >> choice;
 
     bool useKruskal = (choice == 2);
-    exploration.genTree(useKruskal);
+    exploration.genTree();
 
     std::cout << "Exploration setup complete. Begin your journey!" << std::endl;
 }
