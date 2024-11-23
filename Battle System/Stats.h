@@ -16,7 +16,7 @@ protected:
     int health;
     int damage;
     int defense;
-    int speed; // Added speed attribute
+    int speed;
 };
 
 #endif

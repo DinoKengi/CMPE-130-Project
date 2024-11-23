@@ -9,8 +9,8 @@ public:
     static void engage(Player& player, Monster& monster);
 
 private:
-    static void playerTurn(Player& player, Monster& monster); // Declare playerTurn
-    static void monsterTurn(Player& player, Monster& monster); // Declare monsterTurn
+    static void playerTurn(Player& player, Monster& monster);
+    static void monsterTurn(Player& player, Monster& monster);
 };
 
 #endif

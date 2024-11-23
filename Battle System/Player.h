@@ -17,17 +17,17 @@ protected:
 // Specific player classes
 class Wizard : public Player {
 public: 
-    Wizard() : Player("Wizard", 60, 26, 5, 10) {} // Speed: 10
+    Wizard() : Player("Wizard", 60, 26, 5, 10) {} 
 };
 
 class Knight : public Player {
 public:
-    Knight() : Player("Knight", 100, 30, 10, 8) {} // Speed: 8
+    Knight() : Player("Knight", 100, 30, 10, 8) {} 
 };
 
 class Archer : public Player {
 public:
-    Archer() : Player("Archer", 40, 50, 2, 15) {} // Speed: 15
+    Archer() : Player("Archer", 40, 50, 2, 15) {} 
 };
 
 #endif
