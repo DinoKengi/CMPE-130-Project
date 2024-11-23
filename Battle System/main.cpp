@@ -14,15 +14,39 @@ inline void clearScreen() {
 #endif
 }
 
+// Function to allow the player to choose a class
+std::unique_ptr<Player> choosePlayerClass() {
+    int choice;
+    do {
+        std::cout << "Choose your class:\n";
+        std::cout << "1. Knight - High health and defense.\n";
+        std::cout << "2. Wizard - High damage but low health.\n";
+        std::cout << "3. Archer - High speed and critical hits.\n";
+        std::cout << "Enter your choice (1-3): ";
+        std::cin >> choice;
+
+        switch (choice) {
+            case 1:
+                return std::make_unique<Knight>();
+            case 2:
+                return std::make_unique<Wizard>();
+            case 3:
+                return std::make_unique<Archer>();
+            default:
+                std::cout << "Invalid choice. Please try again.\n";
+        }
+    } while (true);
+}
+
 int main() {
-    // Create a player (e.g., Knight)
-    Knight player;
+    // Let the player choose their class
+    std::unique_ptr<Player> player = choosePlayerClass();
 
     // Create a RandomEncounter instance
     RandomEncounter encounterGenerator;
 
     // Game loop: Multiple encounters
-    while (player.getHealth() > 0) {
+    while (player->getHealth() > 0) {
         clearScreen();
 
         // Generate an encounter
@@ -45,10 +69,10 @@ int main() {
         }
 
         // Start the battle
-        Battle::engage(player, *monster);
+        Battle::engage(*player, *monster);
 
         // Check if the player survived
-        if (player.getHealth() <= 0) {
+        if (player->getHealth() <= 0) {
             std::cout << "\nYou have fallen in battle...\n";
             break;
         }
@@ -64,8 +88,8 @@ int main() {
 
     // Game over or exit
     clearScreen();
-    if (player.getHealth() > 0) {
-        std::cout << "Congratulations, " << player.getName()
+    if (player->getHealth() > 0) {
+        std::cout << "Congratulations, " << player->getName()
                   << "! You survived the dungeon.\n";
     } else {
         std::cout << "Game Over. Better luck next time!\n";
