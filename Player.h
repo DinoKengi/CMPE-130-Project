@@ -15,6 +15,7 @@ public:
     int getDamage() const;
     int getDefense() const;
     int getSpeed() const;
+    bool isAlive() const;
 
     // Setter functions
     void setHealth(int health);

@@ -20,13 +20,15 @@ int Monster::getDamage() const {
     return stats.getDamage();
 }
 
-int Monster::getSpeed() const {
-    return stats.getSpeed();
+int Monster::getHealth() const {
+    return stats.getHealth(); // Assuming `stats` is an instance of `Stats` in `Monster`
 }
+
 
 int Monster::getSpeed() const {
     return stats.getSpeed();
 }
+
 void Ogre::attack() {
     // Example attack logic
 }

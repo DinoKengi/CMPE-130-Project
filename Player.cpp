@@ -14,6 +14,10 @@ int Player::getHealth() const {
     return stats.getHealth();
 }
 
+bool Player::isAlive() const {
+    return getHealth() > 0; // Returns true if health is above 0
+}
+
 int Player::getDamage() const {
     return stats.getDamage();
 }

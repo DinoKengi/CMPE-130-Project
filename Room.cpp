@@ -1,4 +1,5 @@
 #include "Room.h"
+#include <iostream>
 
 Room::Room(const std::string& desc)
     : desc(desc), roomBuff(nullptr) {}
@@ -16,6 +17,18 @@ void Room::giveBuff(Player& player) {
         roomBuff->applyTo(player); // Apply the buff to the player
         delete roomBuff;          // Remove the buff from the room (applied once)
         roomBuff = nullptr;
+    }
+}
+
+void Room::setEncounter(std::unique_ptr<Encounter> encounter) {
+    this->encounter = std::move(encounter); // Transfer ownership
+}
+
+void Room::triggerEncounter(Player& player) {
+    if (encounter) {
+        encounter->trigger(player);
+    } else {
+        std::cout << "No encounter in this room.\n";
     }
 }
 

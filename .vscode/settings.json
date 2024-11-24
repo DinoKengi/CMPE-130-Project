@@ -68,7 +68,7 @@
     },
 
     "code-runner.executorMap": {
-        "cpp": "g++ test.cpp Map.cpp Room.cpp Buff.cpp Player.cpp Stats.cpp Story.cpp Battle.cpp Monster.cpp -o test && ./test"
+        "cpp": "g++ test.cpp Map.cpp Room.cpp Buff.cpp Player.cpp Stats.cpp Story.cpp Battle.cpp Monster.cpp Encounter.cpp -o test && ./test"
     },
     "code-runner.runInTerminal": true
 }

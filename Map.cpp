@@ -16,13 +16,37 @@ MapExplore::MapExplore(int numRooms) {
 
 void MapExplore::shuffleRoom() {
     std::default_random_engine generator(std::random_device{}());
-    std::uniform_int_distribution<int> weightDist(1, 100); // Random weights between 1 and 100
+    std::uniform_int_distribution<int> weightDist(1, 30); // random weights between 1 and 30
+    std::uniform_int_distribution<int> encounterDist(0, 1); // Monster or Buff
+    std::uniform_int_distribution<int> monsterDist(0, 4); // one of the 5 monsters we got
 
-    // Ensure each room is connected to at least one other room
     for (size_t i = 0; i < rooms.size() - 1; ++i) {
         int weight = weightDist(generator);
         rooms[i].addEdge(&rooms[i + 1], weight);
         rooms[i + 1].addEdge(&rooms[i], weight); // Ensure bidirectional connection
+    }
+
+    for (auto& room : rooms) {
+        int encounterType = encounterDist(generator);
+
+        if (encounterType == 0) { // MonsterEncounter
+            // Randomly select a monster type
+            std::unique_ptr<Monster> monster;
+            switch (monsterDist(generator)) {
+                case 0: monster = std::make_unique<Goblin>(); break;
+                case 1: monster = std::make_unique<Slime>(); break;
+                case 2: monster = std::make_unique<Ogre>(); break;
+                case 3: monster = std::make_unique<Bandit>(); break;
+                case 4: monster = std::make_unique<Ghost>(); break;
+                default: monster = std::make_unique<Goblin>(); break; // Fallback
+            }
+
+            room.setEncounter(std::make_unique<MonsterEncounter>(std::move(monster)));
+
+        } else if (encounterType == 1) { // BuffEncounter
+            room.setEncounter(std::make_unique<BuffEncounter>(Buff("Damage Boost", 10))); // Example buff
+
+        }
     }
 
     // Add extra random edges for variety
@@ -123,64 +147,48 @@ std::pair<Room*, int> MapExplore::findFarthestNode(Room* startRoom) {
     return {farthestNode, maxDistance};
 }
 
-#include <queue>
-#include <unordered_map>
-
-void MapExplore::startPlayerRoute() {
+void MapExplore::startPlayerRoute(Player& player) {
     if (mstEdges.empty()) {
         std::cerr << "Error: MST is empty. Cannot traverse.\n";
         return;
     }
 
-    Room* startLeaf = nullptr;
-
-    // Find a leaf node as the starting point
+    // Identify all leaf nodes (rooms with one MST connection)
+    std::vector<Room*> leafNodes;
     for (const auto& [room, edges] : mstEdges) {
-        if (edges.size() == 1) { // Leaf nodes have one MST edge
-            startLeaf = room;
-            break;
+        if (edges.size() == 1) {
+            leafNodes.push_back(room);
         }
     }
 
-    if (!startLeaf) {
-        std::cerr << "No leaf nodes found in MST. Map is empty or invalid.\n";
+    if (leafNodes.empty()) {
+        std::cerr << "No leaf nodes found in MST. Cannot start traversal.\n";
         return;
     }
 
-    std::cout << "Starting traversal at: " << startLeaf->getDesc() << "\n";
+    // Randomly select a starting leaf node
+    std::default_random_engine generator(std::random_device{}());
+    std::uniform_int_distribution<int> dist(0, leafNodes.size() - 1);
+    Room* startRoom = leafNodes[dist(generator)];
 
-    bfsTraversal(startLeaf);
-}
+    std::cout << "Starting traversal at: " << startRoom->getDesc() << "\n";
 
-// Perform BFS traversal on the MST
-void MapExplore::bfsTraversal(Room* start) {
-    std::queue<Room*> q;
-    std::unordered_map<Room*, bool> visited;
-
-    q.push(start);
-    visited[start] = true;
-
-    while (!q.empty()) {
-        Room* current = q.front();
-        q.pop();
-
-        // Visit the current room
-        std::cout << "Player visits: " << current->getDesc() << "\n";
-
-        // Add neighbors in the MST to the queue
-        for (Room* neighbor : mstEdges[current]) {
-            if (!visited[neighbor]) {
-                visited[neighbor] = true;
-                q.push(neighbor);
-            }
-        }
+    // Find the farthest node from the starting leaf
+    auto [farthestNode, distance] = findFarthestNode(startRoom);
+    if (!farthestNode) {
+        std::cerr << "Error finding farthest node.\n";
+        return;
     }
+
+    std::cout << "Farthest node is: " << farthestNode->getDesc()
+              << " at a distance of " << distance << "\n";
+
+    // Traverse the path from start to farthest node
+    traverse(startRoom, farthestNode, player);
 }
 
 
-
-
-void MapExplore::traverse(Room* startRoom, Room* endRoom) {
+void MapExplore::traverse(Room* startRoom, Room* endRoom, Player& player) {
     std::unordered_map<Room*, Room*> parent;
     std::queue<Room*> q;
 
@@ -194,12 +202,10 @@ void MapExplore::traverse(Room* startRoom, Room* endRoom) {
 
         if (current == endRoom) break;
 
-        for (const auto& connection : current->getEdges()) {
-            Room* nextRoom = connection.first;
-
-            if (!parent.count(nextRoom)) { // If not visited
-                parent[nextRoom] = current;
-                q.push(nextRoom);
+        for (Room* neighbor : mstEdges[current]) {
+            if (!parent.count(neighbor)) { // If not visited
+                parent[neighbor] = current;
+                q.push(neighbor);
             }
         }
     }
@@ -215,16 +221,19 @@ void MapExplore::traverse(Room* startRoom, Room* endRoom) {
     // Reverse the path to get start-to-end order
     std::reverse(path.begin(), path.end());
 
-    // Guide the player
+    // Guide the player through the path and trigger encounters
+    std::cout << "\nPlayer's Path:\n";
     for (Room* room : path) {
-        std::cout << "Player visits: " << room->getDesc() << std::endl;
+        std::cout << "Player visits: " << room->getDesc() << "\n";
+        room->triggerEncounter(player);
+
+        if (!player.isAlive()) {
+            std::cout << player.getName() << " has fallen in battle...\n";
+            break;
+        }
     }
 }
 
-
-Room* MapExplore::getStart() const {
-    return startRoom;
-}
 
 std::vector<Room>& MapExplore::getRooms() {
     return rooms;

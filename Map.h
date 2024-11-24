@@ -7,7 +7,7 @@
 #include <set>
 #include <algorithm>
 #include <unordered_map> // For std::unordered_map
-#include "ROOM.H"
+#include "Room.h"
 
 class Room;
 
@@ -30,13 +30,9 @@ class MapExplore {
 public:
     MapExplore(int numRooms); // this will help us create list of rooms based on # of rooms
     void genTree(); // option between prim or kruskal
-
-    Room* getStart() const;  // start room (start node)
-    Room* getEnd() const; // farthest node (end room)
-    void startPlayerRoute();
+    void startPlayerRoute(Player& player);
     void shuffleRoom();
     std::pair<Room*, int> findFarthestNode(Room* startRoom); // this for farthest node
-    void bfsTraversal(Room* start);
 
 
     std::vector<Room>& getRooms();
@@ -50,7 +46,7 @@ private:
     Room* endRoom; // farthest room from start
 
     // player traversal routes
-    void traverse(Room* startRoom, Room* endRoom); // guide for playuer along path
+    void traverse(Room* startRoom, Room* endRoom, Player& player); // guide for playuer along path
 };
 
 #endif 
