@@ -185,6 +185,13 @@ void MapExplore::startPlayerRoute(Player& player) {
 
     // Traverse the path from start to farthest node
     traverse(startRoom, farthestNode, player);
+
+    if (player.isAlive()) {
+        std::cout << "\nYou reach the final room...\n";
+        finalBossEncounter(player);
+    } else {
+        std::cout << "\nYou did not survive the dungeon to face the final boss.\n";
+    }
 }
 
 
@@ -226,6 +233,36 @@ void MapExplore::traverse(Room* startRoom, Room* endRoom, Player& player) {
     for (Room* room : path) {
         std::cout << "Player visits: " << room->getDesc() << "\n";
         room->triggerEncounter(player);
+
+        if (!player.isAlive()) {
+            std::cout << player.getName() << " has fallen in battle...\n";
+            break;
+        }
+    }
+}
+
+
+void MapExplore::finalBossEncounter(Player& player) {
+    std::cout << "\nA massive roar echoes through the dungeon...\n";
+    std::cout << "The Dragon emerges to challenge you!\n";
+
+    Dragon dragon;
+
+    // Simple battle loop for the final boss
+    while (player.isAlive() && dragon.isAlive()) {
+        // Player attacks Dragon
+        dragon.takeDamage(player.getDamage());
+        std::cout << player.getName() << " attacks Dragon for " << player.getDamage() << " damage.\n";
+
+        if (!dragon.isAlive()) {
+            std::cout << "The Dragon has been defeated! You are victorious!\n";
+            break;
+        }
+
+        // Dragon attacks Player
+        player.takeDamage(dragon.getDamage());
+        std::cout << "The Dragon attacks " << player.getName()
+                  << " for " << dragon.getDamage() << " damage.\n";
 
         if (!player.isAlive()) {
             std::cout << player.getName() << " has fallen in battle...\n";

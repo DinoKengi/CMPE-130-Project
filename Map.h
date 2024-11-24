@@ -32,6 +32,7 @@ public:
     void genTree(); // option between prim or kruskal
     void startPlayerRoute(Player& player);
     void shuffleRoom();
+    void finalBossEncounter(Player& player); // Final boss encounter function
     std::pair<Room*, int> findFarthestNode(Room* startRoom); // this for farthest node
 
 
