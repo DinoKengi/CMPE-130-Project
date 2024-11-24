@@ -6,6 +6,7 @@
 #include <queue>
 #include <set>
 #include <algorithm>
+#include <unordered_map> // For std::unordered_map
 #include "ROOM.H"
 
 class Room;
@@ -34,14 +35,17 @@ public:
     Room* getEnd() const; // farthest node (end room)
     void startPlayerRoute();
     void shuffleRoom();
-    std::pair<Room*, int> findfarthestNode(Room* startRoom); // this for farthest node
+    std::pair<Room*, int> findFarthestNode(Room* startRoom); // this for farthest node
+    void bfsTraversal(Room* start);
 
 
     std::vector<Room>& getRooms();
 
 private:
-    std::vector<Room> room; // room storage
+    std::vector<Room> rooms; // room storage
     std::vector<Edge> mst;
+    std::unordered_map<Room*, std::vector<Room*>> mstEdges; // Tracks MST connections
+
     Room* startRoom; // starting room
     Room* endRoom; // farthest room from start
 

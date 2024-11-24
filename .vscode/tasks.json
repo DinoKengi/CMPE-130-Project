@@ -13,6 +13,8 @@
                 "Player.cpp",
                 "Stats.cpp",
                 "Story.cpp",
+                "Battle.cpp",
+                "Monster.cpp",
                 "-o",
                 "test",
                 "-std=c++17",

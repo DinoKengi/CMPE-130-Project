@@ -1,12 +1,13 @@
 #include "Map.h"
 #include <iostream>
+#include <algorithm>
 #include <random>
 #include <unordered_map>
 
 
 MapExplore::MapExplore(int numRooms) {
     for (int i = 0; i < numRooms; ++i) {
-        room.emplace_back("Room " + std::to_string(i));
+        rooms.emplace_back("Room " + std::to_string(i));
     }
     startRoom = nullptr;
     endRoom = nullptr;
@@ -14,27 +15,45 @@ MapExplore::MapExplore(int numRooms) {
 
 
 void MapExplore::shuffleRoom() {
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(room.begin(), room.end(), g);
+    std::default_random_engine generator(std::random_device{}());
+    std::uniform_int_distribution<int> weightDist(1, 100); // Random weights between 1 and 100
+
+    // Ensure each room is connected to at least one other room
+    for (size_t i = 0; i < rooms.size() - 1; ++i) {
+        int weight = weightDist(generator);
+        rooms[i].addEdge(&rooms[i + 1], weight);
+        rooms[i + 1].addEdge(&rooms[i], weight); // Ensure bidirectional connection
+    }
+
+    // Add extra random edges for variety
+    std::uniform_int_distribution<int> roomDist(0, rooms.size() - 1);
+    for (size_t i = 0; i < rooms.size(); ++i) {
+        Room* roomA = &rooms[roomDist(generator)];
+        Room* roomB = &rooms[roomDist(generator)];
+        if (roomA != roomB) { // Avoid self-loops
+            int weight = weightDist(generator);
+            roomA->addEdge(roomB, weight);
+            roomB->addEdge(roomA, weight); // Ensure bidirectional connection
+        }
+    }
+
+    std::cout << "Rooms and edges randomized.\n";
 }
 
 void MapExplore::genTree() {
-    if (room.empty()) {
+    if (rooms.empty()) {
         std::cerr << "Error: No rooms to generate MST.\n";
         return;
     }
 
-    // Priority queue for edges with smallest weight first
     std::priority_queue<Edge, std::vector<Edge>, std::greater<Edge>> pq;
     std::set<Room*> visited;
+    mstEdges.clear(); // Clear MST edges
 
-    // Start with the first room
-    visited.insert(&room[0]);
+    visited.insert(&rooms[0]); // Start with the first room
 
-    // Add edges of the first room to the queue
-    for (const auto& edge : room[0].getEdges()) {
-        pq.push(Edge(&room[0], edge.first, edge.second)); // Convert std::pair to Edge
+    for (const auto& edge : rooms[0].getEdges()) {
+        pq.push(Edge(&rooms[0], edge.first, edge.second));
     }
 
     while (!pq.empty()) {
@@ -44,9 +63,14 @@ void MapExplore::genTree() {
         if (visited.find(current.to) != visited.end()) continue;
 
         visited.insert(current.to);
-        mst.emplace_back(current);
+        mst.emplace_back(current); // Add edge to MST
 
-        std::cout << "Connecting " << current.from->getDesc() << " to " << current.to->getDesc() << "\n";
+        // Track edges in MST for each room
+        mstEdges[current.from].emplace_back(current.to);
+        mstEdges[current.to].emplace_back(current.from);
+
+        std::cout << "Connecting " << current.from->getDesc() << " to " << current.to->getDesc()
+                  << " with weight " << current.weight << "\n";
 
         for (const auto& edge : current.to->getEdges()) {
             if (visited.find(edge.first) == visited.end()) {
@@ -55,7 +79,7 @@ void MapExplore::genTree() {
         }
     }
 
-    if (visited.size() != room.size()) {
+    if (visited.size() != rooms.size()) {
         std::cerr << "Error: MST could not connect all rooms.\n";
         return;
     }
@@ -65,8 +89,7 @@ void MapExplore::genTree() {
 
 
 
-
-std::pair<Room*, int> MapExplore::findfarthestNode(Room* startRoom) {
+std::pair<Room*, int> MapExplore::findFarthestNode(Room* startRoom) {
     std::queue<std::pair<Room*, int>> q; // Pair: Room and distance from start
     std::unordered_map<Room*, bool> visited;
     Room* farthestNode = startRoom;
@@ -100,33 +123,62 @@ std::pair<Room*, int> MapExplore::findfarthestNode(Room* startRoom) {
     return {farthestNode, maxDistance};
 }
 
+#include <queue>
+#include <unordered_map>
+
 void MapExplore::startPlayerRoute() {
-    // Identify a leaf node
+    if (mstEdges.empty()) {
+        std::cerr << "Error: MST is empty. Cannot traverse.\n";
+        return;
+    }
+
     Room* startLeaf = nullptr;
-    for (auto& room : room) {
-        if (room.getEdges().size() == 1) { // Leaf nodes have 1 connection
-            startLeaf = &room;
+
+    // Find a leaf node as the starting point
+    for (const auto& [room, edges] : mstEdges) {
+        if (edges.size() == 1) { // Leaf nodes have one MST edge
+            startLeaf = room;
             break;
         }
     }
 
     if (!startLeaf) {
-        std::cout << "No leaf nodes found. Map is empty or invalid." << std::endl;
+        std::cerr << "No leaf nodes found in MST. Map is empty or invalid.\n";
         return;
     }
 
-    // Find the farthest node from the starting leaf node
-    auto [farthestNode, distance] = findfarthestNode(startLeaf);
-    endRoom = farthestNode;
+    std::cout << "Starting traversal at: " << startLeaf->getDesc() << "\n";
 
-    std::cout << "Starting at: " << startLeaf->getDesc() << std::endl;
-    std::cout << "Farthest node is: " << farthestNode->getDesc()
-              << " at a distance of " << distance << std::endl;
-
-    // Guide the player along the path
-    std::cout << "Guiding player from start to farthest node..." << std::endl;
-    traverse(startLeaf, farthestNode);
+    bfsTraversal(startLeaf);
 }
+
+// Perform BFS traversal on the MST
+void MapExplore::bfsTraversal(Room* start) {
+    std::queue<Room*> q;
+    std::unordered_map<Room*, bool> visited;
+
+    q.push(start);
+    visited[start] = true;
+
+    while (!q.empty()) {
+        Room* current = q.front();
+        q.pop();
+
+        // Visit the current room
+        std::cout << "Player visits: " << current->getDesc() << "\n";
+
+        // Add neighbors in the MST to the queue
+        for (Room* neighbor : mstEdges[current]) {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                q.push(neighbor);
+            }
+        }
+    }
+}
+
+
+
 
 void MapExplore::traverse(Room* startRoom, Room* endRoom) {
     std::unordered_map<Room*, Room*> parent;
@@ -175,6 +227,6 @@ Room* MapExplore::getStart() const {
 }
 
 std::vector<Room>& MapExplore::getRooms() {
-    return room;
+    return rooms;
 }
 
