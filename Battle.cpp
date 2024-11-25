@@ -1,6 +1,6 @@
 #include "Battle.h"
 #include <iostream>
-#include <cstdlib> // For clearScreen()
+#include <cstdlib> // For system()
 
 // Function to clear the screen
 void clearScreen() {
@@ -11,9 +11,8 @@ void clearScreen() {
 #endif
 }
 
-// Function to display the health of the player and monster at the top
+// Function to display the health of the player and monster
 void displayHeader(const Player& player, const Monster& monster) {
-    clearScreen();
     std::cout << "=====================================\n";
     std::cout << "Player: " << player.getName() << " | HP: " << player.getHealth() << "\n";
     std::cout << "Monster: " << monster.getName() << " | HP: " << monster.getHealth() << "\n";
@@ -22,18 +21,20 @@ void displayHeader(const Player& player, const Monster& monster) {
 
 // Main battle function
 void Battle::engage(Player& player, Monster& monster) {
+    int turnCounter = 0; // Track player turns for strong attack
+
     std::cout << "A wild " << monster.getName() << " appears!\n";
 
     while (player.getHealth() > 0 && monster.getHealth() > 0) {
         displayHeader(player, monster); // Show the current status before each turn
 
-        // Determine turn order based on speed
         bool playerGoesFirst = player.getSpeed() >= monster.getSpeed();
 
         if (playerGoesFirst) {
-            playerTurn(player, monster);
+            turnCounter++;
+            playerTurn(player, monster, turnCounter);
             if (monster.getHealth() <= 0) {
-                std::cout << monster.getName() << " is defeated!\n";
+                std::cout << monster.getName() << " has been defeated!\n";
                 break;
             }
             monsterTurn(player, monster);
@@ -43,7 +44,8 @@ void Battle::engage(Player& player, Monster& monster) {
                 std::cout << player.getName() << " has fallen in battle.\n";
                 break;
             }
-            playerTurn(player, monster);
+            turnCounter++;
+            playerTurn(player, monster, turnCounter);
         }
     }
 
@@ -55,28 +57,39 @@ void Battle::engage(Player& player, Monster& monster) {
 }
 
 // Player's turn
-void Battle::playerTurn(Player& player, Monster& monster) {
-    displayHeader(player, monster); // Show status at the start of the player's turn
+void Battle::playerTurn(Player& player, Monster& monster, int turnCounter) {
+    displayHeader(player, monster);
 
     std::cout << "\nYour turn:\n";
     std::cout << "1. Attack\n";
     std::cout << "2. Block\n";
-    std::cout << "Choose an action (1/2): ";
+    if (turnCounter >= 3) {
+        std::cout << "3. Strong Attack (Available!)\n";
+    }
+    std::cout << "Choose an action: ";
     int choice;
     std::cin >> choice;
 
     if (choice == 1) {
-        // Player attacks
         int damageToMonster = player.getDamage();
         std::cout << player.getName() << " attacks " << monster.getName()
                   << " for " << damageToMonster << " damage.\n";
         monster.takeDamage(damageToMonster);
     } else if (choice == 2) {
-        // Player blocks
-        std::cout << player.getName() << " prepares to block.\n";
-        // Blocking logic can reduce monster's damage on the next turn
+        std::cout << player.getName() << " blocks the attack, reducing incoming damage.\n";
+        player.setDefense(player.getDefense() + 5); // Temporary block effect
+    } else if (choice == 3 && turnCounter >= 3) {
+        int strongAttackDamage = player.getDamage() * 2; // Strong attack deals double damage
+        std::cout << player.getName() << " unleashes a powerful attack on " << monster.getName()
+                  << " for " << strongAttackDamage << " damage!\n";
+        monster.takeDamage(strongAttackDamage);
+        turnCounter = 0; // Reset turn counter after strong attack
     } else {
-        std::cout << "Invalid choice. You lose your turn.\n";
+        std::cout << "Invalid choice or strong attack not available. You lose your turn.\n";
+    }
+
+    if (choice == 2) {
+        player.setDefense(player.getDefense() - 5); // Remove block effect
     }
 
     std::cout << "Press Enter to continue...";
@@ -86,10 +99,11 @@ void Battle::playerTurn(Player& player, Monster& monster) {
 
 // Monster's turn
 void Battle::monsterTurn(Player& player, Monster& monster) {
-    displayHeader(player, monster); // Show status at the start of the monster's turn
+    displayHeader(player, monster);
 
     std::cout << "\n" << monster.getName() << "'s turn:\n";
-    int damageToPlayer = monster.getDamage();
+    int damageToPlayer = monster.getDamage() - player.getDefense();
+    if (damageToPlayer < 0) damageToPlayer = 0;
     std::cout << monster.getName() << " attacks " << player.getName()
               << " for " << damageToPlayer << " damage.\n";
     player.takeDamage(damageToPlayer);

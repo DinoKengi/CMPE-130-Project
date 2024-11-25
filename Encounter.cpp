@@ -13,30 +13,65 @@ void MonsterEncounter::trigger(Player& player) {
 
     std::cout << "A wild " << monster->getName() << " appears!\n";
 
-    // Simple battle loop
     while (player.isAlive() && monster->isAlive()) {
-        // Player attacks monster
-        monster->takeDamage(player.getDamage());
-        std::cout << player.getName() << " attacks " << monster->getName()
-                  << " for " << player.getDamage() << " damage.\n";
+        // Display stats
+        std::cout << "\n=====================================\n";
+        std::cout << "Player's Stats:\n";
+        std::cout << "Health: " << player.getHealth()
+                  << ", Damage: " << player.getDamage()
+                  << ", Defense: " << player.getDefense() << "\n";
+        std::cout << "Monster's Stats:\n";
+        std::cout << "Health: " << monster->getHealth()
+                  << ", Damage: " << monster->getDamage() << "\n";
+        std::cout << "=====================================\n";
 
-        if (!monster->isAlive()) {
-            std::cout << monster->getName() << " has been defeated!\n";
-            break;
+        // Ask the player for their action
+        std::cout << "\nYour turn! Choose an action:\n";
+        std::cout << "1. Attack\n";
+        std::cout << "2. Block\n";
+        std::cout << "Enter your choice: ";
+        int choice;
+        std::cin >> choice;
+
+        if (choice == 1) {
+            // Player attacks the monster
+            int damageToMonster = player.getDamage();
+            std::cout << player.getName() << " attacks " << monster->getName()
+                      << " for " << damageToMonster << " damage.\n";
+            monster->takeDamage(damageToMonster);
+
+        } else if (choice == 2) {
+            // Player blocks, increasing defense temporarily
+            std::cout << player.getName() << " blocks the next attack!\n";
+            player.setDefense(player.getDefense() + 5);
+        } else {
+            std::cout << "Invalid choice! You lose your turn.\n";
         }
 
-        // Monster attacks player
-        player.takeDamage(monster->getDamage());
-        std::cout << monster->getName() << " attacks " << player.getName()
-                  << " for " << monster->getDamage() << " damage.\n";
+        // Check if the monster is still alive for its turn
+        if (monster->isAlive()) {
+            // Monster attacks the player
+            int damageToPlayer = monster->getDamage() - player.getDefense();
+            if (damageToPlayer < 0) damageToPlayer = 0; // Ensure non-negative damage
 
-        if (!player.isAlive()) {
-            std::cout << player.getName() << " has fallen in battle...\n";
-            break;
+            std::cout << monster->getName() << " attacks " << player.getName()
+                      << " for " << damageToPlayer << " damage.\n";
+            player.takeDamage(damageToPlayer);
+
+            // Reset the player's temporary defense boost if they blocked
+            if (choice == 2) {
+                player.setDefense(player.getDefense() - 5);
+            }
+        }
+
+        // Check victory or defeat conditions
+        if (!monster->isAlive()) {
+            std::cout << "\n" << monster->getName() << " has been defeated!\n";
+        } else if (!player.isAlive()) {
+            std::cout << "\n" << player.getName() << " has fallen in battle...\n";
         }
     }
 }
-
 
 // BuffEncounter Implementation
 BuffEncounter::BuffEncounter(const Buff& buff)
