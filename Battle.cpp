@@ -102,12 +102,18 @@ void Battle::monsterTurn(Player& player, Monster& monster) {
     displayHeader(player, monster);
 
     std::cout << "\n" << monster.getName() << "'s turn:\n";
-    int damageToPlayer = monster.getDamage() - player.getDefense();
-    if (damageToPlayer < 0) damageToPlayer = 0;
+
+    // Calculate damage dealt to the player, ensuring it is at least 0
+    int damageToPlayer = std::max(0, monster.getDamage() - player.getDefense());
+
+    // Output the monster's attack
     std::cout << monster.getName() << " attacks " << player.getName()
               << " for " << damageToPlayer << " damage.\n";
+
+    // Apply damage to the player
     player.takeDamage(damageToPlayer);
 
+    // Pause for user interaction
     std::cout << "Press Enter to continue...";
     std::cin.ignore();
     std::cin.get();

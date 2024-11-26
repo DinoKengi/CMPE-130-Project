@@ -242,34 +242,118 @@ void MapExplore::traverse(Room* startRoom, Room* endRoom, Player& player) {
 }
 
 
+// void MapExplore::finalBossEncounter(Player& player) {
+//     std::cout << "\nA massive roar echoes through the dungeon...\n";
+//     std::cout << "The Dragon emerges to challenge you!\n";
+
+//     Dragon dragon;
+
+//     // Simple battle loop for the final boss
+//     while (player.isAlive() && dragon.isAlive()) {
+//         // Player attacks Dragon
+//         dragon.takeDamage(player.getDamage());
+//         std::cout << player.getName() << " attacks Dragon for " << player.getDamage() << " damage.\n";
+
+//         if (!dragon.isAlive()) {
+//             std::cout << "The Dragon has been defeated! You are victorious!\n";
+//             break;
+//         }
+
+//         // Dragon attacks Player
+//         player.takeDamage(dragon.getDamage());
+//         std::cout << "The Dragon attacks " << player.getName()
+//                   << " for " << dragon.getDamage() << " damage.\n";
+
+//         if (!player.isAlive()) {
+//             std::cout << player.getName() << " has fallen in battle...\n";
+//             break;
+//         }
+//     }
+// }
+
 void MapExplore::finalBossEncounter(Player& player) {
     std::cout << "\nA massive roar echoes through the dungeon...\n";
     std::cout << "The Dragon emerges to challenge you!\n";
 
     Dragon dragon;
+    int turnCounter = 0; // Counter to track the number of turns
 
-    // Simple battle loop for the final boss
+    // Battle loop
     while (player.isAlive() && dragon.isAlive()) {
-        // Player attacks Dragon
-        dragon.takeDamage(player.getDamage());
-        std::cout << player.getName() << " attacks Dragon for " << player.getDamage() << " damage.\n";
+        // Player's turn
+        turnCounter++; // Increment turn counter
+        std::cout << "\nYour turn! Choose an action:\n";
+        std::cout << "1. Attack\n";
+        std::cout << "2. Block\n";
+        std::cout << "3. Rest (restore some health)\n";
+        if (turnCounter >= 3) { // Enable strong attack after every 3 turns
+            std::cout << "4. Strong Attack (3x damage!)\n";
+        }
 
+        int choice;
+        std::cin >> choice;
+
+        switch (choice) {
+            case 1: { // Regular Attack
+                int damageToDragon = player.getDamage();
+                dragon.takeDamage(damageToDragon);
+                std::cout << player.getName() << " attacks Dragon for " << damageToDragon << " damage.\n";
+                break;
+            }
+            case 2: { // Block
+                std::cout << player.getName() << " braces for the Dragon's attack.\n";
+                player.setDefense(player.getDefense() + 10); // Temporary defense boost
+                break;
+            }
+            case 3: { // Rest
+                int healAmount = 20; // Example: Restore 20 health
+                player.setHealth(player.getHealth() + healAmount);
+                std::cout << player.getName() << " rests and recovers " << healAmount << " health.\n";
+                break;
+            }
+            case 4: { // Strong Attack (only available after 3 turns)
+                if (turnCounter >= 3) {
+                    int strongDamage = player.getDamage() * 3; // 3x damage
+                    dragon.takeDamage(strongDamage);
+                    std::cout << player.getName() << " unleashes a powerful attack on Dragon for " << strongDamage << " damage!\n";
+                    turnCounter = 0; // Reset counter after strong attack
+                } else {
+                    std::cout << "Strong Attack is not available yet. Try again.\n";
+                    turnCounter--; // Do not count this as a valid turn
+                }
+                break;
+            }
+            default:
+                std::cout << "Invalid choice! The Dragon takes advantage of your hesitation.\n";
+                break;
+        }
+
+        // Check if Dragon is defeated
         if (!dragon.isAlive()) {
             std::cout << "The Dragon has been defeated! You are victorious!\n";
             break;
         }
 
-        // Dragon attacks Player
-        player.takeDamage(dragon.getDamage());
-        std::cout << "The Dragon attacks " << player.getName()
-                  << " for " << dragon.getDamage() << " damage.\n";
+        // Dragon's turn
+        int damageToPlayer = dragon.getDamage() - player.getDefense();
+        if (damageToPlayer < 0) damageToPlayer = 0; // Prevent negative damage
+        player.takeDamage(damageToPlayer);
+        std::cout << "The Dragon attacks " << player.getName() << " for " << damageToPlayer << " damage.\n";
 
+        // Reset player's temporary defense boost
+        if (choice == 2) {
+            player.setDefense(player.getDefense() - 10);
+        }
+
+        // Check if Player is defeated
         if (!player.isAlive()) {
             std::cout << player.getName() << " has fallen in battle...\n";
             break;
         }
     }
 }
+
+
 
 
 std::vector<Room>& MapExplore::getRooms() {

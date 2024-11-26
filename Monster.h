@@ -54,7 +54,7 @@ public:
 // idea: dragon is final boss
 class Dragon : public Monster {
 public:
-    Dragon() : Monster("Dragon", 2000, 60, 30, 10) {}
+    Dragon() : Monster("Dragon", 400, 60, 30, 10) {}
     void attack() override;
 };
 
