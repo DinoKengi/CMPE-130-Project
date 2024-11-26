@@ -9,6 +9,11 @@
 #include <string>
 
 int main() {
+
+
+    
+
+
     // Welcome message
     std::cout << "=====================================\n";
     std::cout << "       Welcome to the Adventure!     \n";
@@ -18,10 +23,13 @@ int main() {
 
     // Map randomization
     std::cout << "Randomizing the dungeon layout...\n";
-    MapExplore map(5);  // Create a map with 5 rooms
+    MapExplore map(7);  // Create a map with 5 rooms
     map.shuffleRoom();  // Randomize room connections and encounters
     map.genTree();      // Generate a minimum spanning tree
     std::cout << "The dungeon is ready. Prepare to enter!\n\n";
+
+    
+
 
     // Set the final room as the Dragon's lair
     auto& rooms = map.getRooms();
@@ -58,6 +66,9 @@ int main() {
             break;
     }
 
+    map.startPlayerRoute(player);
+
+
     std::cout << "\nWelcome, " << player->getName() << " the " << player->getClassType() << "!\n";
     std::cout << "Starting Stats - Health: " << player->getHealth()
               << ", Damage: " << player->getDamage()
@@ -76,8 +87,7 @@ int main() {
 
         std::cout << "What would you like to do?\n";
         std::cout << "1. Explore this room\n";
-        std::cout << "2. Skip to the next room\n";
-        std::cout << "3. Rest and regain some health\n";
+        std::cout << "2. Rest and regain some health\n";
         std::cout << "Enter your choice: ";
         int choice;
         std::cin >> choice;
@@ -100,10 +110,6 @@ int main() {
             ++roomIndex; // Move to the next room after exploring
 
         } else if (choice == 2) {
-            std::cout << "You skipped this room.\n";
-            ++roomIndex; // Move to the next room after skipping
-
-        } else if (choice == 3) {
             // Resting logic: Heal a fixed amount or based on player's class
             int healAmount = 15;
             player->setHealth(player->getHealth() + healAmount);

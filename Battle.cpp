@@ -79,7 +79,7 @@ void Battle::playerTurn(Player& player, Monster& monster, int turnCounter) {
         std::cout << player.getName() << " blocks the attack, reducing incoming damage.\n";
         player.setDefense(player.getDefense() + 5); // Temporary block effect
     } else if (choice == 3 && turnCounter >= 3) {
-        int strongAttackDamage = player.getDamage() * 2; // Strong attack deals double damage
+        int strongAttackDamage = player.getDamage() * 3; // Strong attack deals double damage
         std::cout << player.getName() << " unleashes a powerful attack on " << monster.getName()
                   << " for " << strongAttackDamage << " damage!\n";
         monster.takeDamage(strongAttackDamage);

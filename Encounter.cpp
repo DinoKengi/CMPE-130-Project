@@ -13,6 +13,8 @@ void MonsterEncounter::trigger(Player& player) {
 
     std::cout << "A wild " << monster->getName() << " appears!\n";
 
+    int turnCounter = 0; // Track player turns for strong attack
+
     while (player.isAlive() && monster->isAlive()) {
         // Display stats
         std::cout << "\n=====================================\n";
@@ -29,6 +31,9 @@ void MonsterEncounter::trigger(Player& player) {
         std::cout << "\nYour turn! Choose an action:\n";
         std::cout << "1. Attack\n";
         std::cout << "2. Block\n";
+        if (turnCounter >= 3) {
+            std::cout << "3. Strong Attack (Available!)\n";
+        }
         std::cout << "Enter your choice: ";
         int choice;
         std::cin >> choice;
@@ -44,8 +49,17 @@ void MonsterEncounter::trigger(Player& player) {
             // Player blocks, increasing defense temporarily
             std::cout << player.getName() << " blocks the next attack!\n";
             player.setDefense(player.getDefense() + 5);
+
+        } else if (choice == 3 && turnCounter >= 3) {
+            // Player performs a strong attack
+            int strongAttackDamage = player.getDamage() * 2; // Strong attack deals double damage
+            std::cout << player.getName() << " unleashes a powerful attack on " << monster->getName()
+                      << " for " << strongAttackDamage << " damage!\n";
+            monster->takeDamage(strongAttackDamage);
+            turnCounter = 0; // Reset turn counter after strong attack
+
         } else {
-            std::cout << "Invalid choice! You lose your turn.\n";
+            std::cout << "Invalid choice or strong attack not available. You lose your turn.\n";
         }
 
         // Check if the monster is still alive for its turn
@@ -70,6 +84,8 @@ void MonsterEncounter::trigger(Player& player) {
         } else if (!player.isAlive()) {
             std::cout << "\n" << player.getName() << " has fallen in battle...\n";
         }
+
+        turnCounter++; // Increment turn counter at the end of each player turn
     }
 }
 
